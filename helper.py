@@ -143,3 +143,54 @@ def save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_p
         sess, logits, keep_prob, input_image, os.path.join(data_dir, 'data_road/testing'), image_shape)
     for name, image in image_outputs:
         scipy.misc.imsave(os.path.join(output_dir, name), image)
+
+
+def create_weights(shape):
+    return tf.Variable(tf.truncated_normal(shape, stddev=0.05))
+
+
+def create_biases(shape):
+    return tf.Variable(tf.zeros(shape) + 0.05)
+
+
+def create_conv_layer(input_layer,               # 4D tensor
+                      filter_size,               # scalar
+                      n_filters,                 # scalar
+                      use_pooling=False,         # boolean
+                      use_relu=False,            # boolean
+                      dropout_keep_prob=None     # tensor variable
+                     ):
+    # Create weights (4D tensor) and biases (1D vector)
+    input_depth = input_layer.get_shape()[3].value
+    weight_shape = [filter_size, filter_size, input_depth, n_filters]
+    bias_shape = [n_filters]
+
+    weights = create_weights(weight_shape)
+    biases = create_biases(bias_shape)
+
+    # Convolution
+    layer = tf.nn.conv2d(input=input_layer,
+                         filter=weights,
+                         strides=[1,1,1,1],
+                         padding='SAME')
+    # Add bias
+    layer = tf.nn.bias_add(layer, biases)
+
+    # Max pooling
+    if use_pooling:
+        layer = tf.nn.max_pool(value=layer,
+                               ksize=[1,2,2,1],
+                               strides=[1,2,2,1],
+                               padding='SAME')
+
+    # ReLU. Should be applied before pooling. However the result is the same and in this
+    # case we perform fewer computations, since there are fewer pixels
+    if use_relu:
+        layer = tf.nn.relu(layer)
+
+    # Dropout
+    if dropout_keep_prob is not None:
+        layer = tf.nn.dropout(layer, dropout_keep_prob)
+
+    return layer
+

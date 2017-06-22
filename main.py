@@ -1,8 +1,8 @@
-import os.path
+import os
 import tensorflow as tf
 import helper
 import project_tests as tests
-
+import shutil
 
 def load_vgg(sess, vgg_path):
     """
@@ -29,7 +29,7 @@ def load_vgg(sess, vgg_path):
     layer7_out = sess.graph.get_tensor_by_name(vgg_layer7_out_tensor_name)
 
     return image_input, keep_prob, layer3_out, layer4_out, layer7_out
-tests.test_load_vgg(load_vgg, tf)
+#tests.test_load_vgg(load_vgg, tf)
 
 
 def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
@@ -55,7 +55,6 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     #   - Take pool4, apply score, upsample 2 -> pred4_x2
     #   - Take pool3, apply score, fuse: pred_fused = tf.nn.add(pred_3, pred4_x2, pred7_x4)
     #     Create final prediction by upsampling 8 -> pred_fused_x8
-
 
     return None
 #tests.test_layers(layers)
@@ -95,7 +94,20 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     # TODO: Implement function
     pass
 #tests.test_train_nn(train_nn)
+def create_summary(sess):
+    logdir = 'log_dir'
 
+    # Delete old logs
+    if os.path.isdir(logdir):
+        shutil.rmtree(logdir)
+
+    # Create a fresh new log directory
+    os.makedirs(logdir)
+
+    # Write data
+    writer = tf.summary.FileWriter(logdir)
+    writer.add_graph(sess.graph)
+    writer.close()
 
 def run():
     num_classes = 2
@@ -126,6 +138,8 @@ def run():
         # TODO: Save inference data using helper.save_inference_samples
         #  helper.save_inference_samples(runs_dir, data_dir, sess, image_shape, logits, keep_prob, input_image)
 
+        # Write a summary of the process
+        create_summary(sess)
 
 if __name__ == '__main__':
     run()
