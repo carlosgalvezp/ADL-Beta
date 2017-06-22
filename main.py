@@ -42,6 +42,21 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     :return: The Tensor for the last layer of output
     """
     # TODO: Implement function
+    # https://people.eecs.berkeley.edu/~jonlong/long_shelhamer_fcn.pdf
+    # https://github.com/MarvinTeichmann/tensorflow-fcn/blob/master/fcn8_vgg.py
+
+    # TODO
+    # 1) Define functions for creating:
+    # -Score function [h, w, n_input_features, n_output_classes = 2]
+    # -Bilinear interpolation filter
+    # -Deconvolution/upsampling layer, initial weights to the bilinear filter
+    # -Construct output as follows:
+    #   - Take layer7, apply score, upsample 4 -> pred7_x4
+    #   - Take pool4, apply score, upsample 2 -> pred4_x2
+    #   - Take pool3, apply score, fuse: pred_fused = tf.nn.add(pred_3, pred4_x2, pred7_x4)
+    #     Create final prediction by upsampling 8 -> pred_fused_x8
+
+
     return None
 #tests.test_layers(layers)
 
@@ -56,6 +71,8 @@ def optimize(nn_last_layer, correct_label, learning_rate, num_classes):
     :return: Tuple of (logits, train_op, cross_entropy_loss)
     """
     # TODO: Implement function
+    # Get classification with argmax
+    # Loss as classification, pixel-wise with correct label
     return None, None, None
 #tests.test_optimize(optimize)
 
